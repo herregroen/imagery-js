@@ -15,16 +15,16 @@
 
   Imagery.prototype = {
     resize: function (width, height) {
-      this.width  = width;
-      this.height = height;
+      this.canvas.width  = this.width  = width;
+      this.canvas.height = this.height = height;
 
       this.render();
     },
     fit: function (width, height) {
       var ratio = Math.min(width / this.width, height / this.height);
 
-      this.width  *= ratio;
-      this.height *= ratio;
+      this.canvas.width  = this.width  *= ratio;
+      this.canvas.height = this.height *= ratio;
 
       this.render();
     },
@@ -71,9 +71,9 @@
   };
 
   window.createImagery = function (obj, cb) {
-    var image = new Image();
+    var image = new Image(), called = false;
     image.crossOrigin = 'anonymous';
-    image.onload = function () { cb(new Imagery(this)); }
+    image.onload = function () { if (called = !called) { cb(new Imagery(this)); } }
     if (obj instanceof File) {
       image.src = URL.createObjectURL(obj);
     } else if ((obj.tagName && obj.tagName === 'IMG') || obj instanceof Image) {
@@ -85,6 +85,7 @@
     } else{
       return false;
     }
+    if (image.complete && !called) { cb(new Imagery(this)); }
     return true;
   };
 }(this));
