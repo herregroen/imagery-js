@@ -18,7 +18,7 @@
       this.x = 0
       this.y = 0
 
-      this.render();
+      this.rendered = false;
     },
     fit: function (width, height) {
       var ratio = Math.min(width / this.width, height / this.height);
@@ -40,15 +40,21 @@
       this.canvas.width  = width;
       this.canvas.height = height;
 
+      this.rendered = true;
+
       this.canvas.getContext('2d').drawImage(this.image, this.x, this.y, this.width, this.height);
     },
     render: function () {
       this.canvas.width  = this.width;
       this.canvas.height = this.height;
 
+      this.rendered = true;
+
       this.canvas.getContext('2d').drawImage(this.image, this.x, this.y, this.width, this.height);
     },
     to_blob: function () {
+      if (!this.rendered) { this.render(); }
+
       var dataURL = this.canvas.toDataURL('image/png');
       var binary  = atob(dataURL.split(',')[1]);
       var array   = [];
@@ -58,6 +64,8 @@
       return new Blob([new Uint8Array(array)], { type: 'image/png' });
     },
     to_dataURL: function () {
+      if (!this.rendered) { this.render(); }
+
       return this.canvas.toDataURL('image/png');
     }
   };
