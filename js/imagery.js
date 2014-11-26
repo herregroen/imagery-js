@@ -71,7 +71,7 @@
       image.src = obj.src
     } else if (obj.tagName && obj.tagName === 'CANVAS') {
       image.src = obj.toDataURL();
-    } else if (obj typeof === 'string') {
+    } else if (typeof obj === 'string') {
       image.src = obj;
     } else{
       return false;
