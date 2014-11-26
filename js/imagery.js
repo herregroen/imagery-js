@@ -7,7 +7,7 @@
     this.width  = img.width;
     this.height = img.height;
 
-    this.resize(this.image.width, this.image.height);
+    this.render();
   };
 
   Imagery.prototype = {
@@ -15,21 +15,38 @@
       this.width  = width;
       this.height = height;
 
+      this.x = 0
+      this.y = 0
+
       this.render();
     },
     fit: function (width, height) {
-      var ratio = Math.min(width / this.width, height / this.height)
+      var ratio = Math.min(width / this.width, height / this.height);
 
-      this.width  *= ratio
-      this.height *= ratio
+      this.width  *= ratio;
+      this.height *= ratio;
 
-      this.render()
+      this.render();
+    },
+    fill: function (width, height) {
+      var ratio = Math.max(width / this.width, height / this.height);
+
+      this.x = ((this.width * ratio) - width) / -2;
+      this.y = ((this.height * ratio) - height) / -2;
+
+      this.width  *= ratio;
+      this.height *= ratio;
+
+      this.canvas.width  = width;
+      this.canvas.height = height;
+
+      this.canvas.getContext('2d').drawImage(this.image, this.x, this.y, this.width, this.height);
     },
     render: function () {
       this.canvas.width  = this.width;
       this.canvas.height = this.height;
 
-      this.canvas.getContext('2d').drawImage(this.image, 0, 0, this.width, this.height)
+      this.canvas.getContext('2d').drawImage(this.image, this.x, this.y, this.width, this.height);
     },
     to_blob: function () {
       var dataURL = this.canvas.toDataURL('image/png');
@@ -50,11 +67,13 @@
     image.onload = function () { cb(new Imagery(this)); }
     if (obj instanceof File) {
       image.src = URL.createObjectURL(obj);
-    } else if ((obj.tagName && obj.tagName === 'img') || obj instanceof Image) {
-      imgage.src = obj.src
-    } else if (obj.tagName && obj.tagName === 'canvas') {
+    } else if ((obj.tagName && obj.tagName === 'IMG') || obj instanceof Image) {
+      image.src = obj.src
+    } else if (obj.tagName && obj.tagName === 'CANVAS') {
       image.src = obj.toDataURL();
-    } else {
+    } else if (obj typeof === 'string') {
+      image.src = obj;
+    } else{
       return false;
     }
     return true;
