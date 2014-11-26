@@ -7,7 +7,10 @@
     this.width  = img.width;
     this.height = img.height;
 
-    this.render();
+    this.x = 0
+    this.y = 0
+
+    this.rendered = false;
   };
 
   Imagery.prototype = {
@@ -15,10 +18,7 @@
       this.width  = width;
       this.height = height;
 
-      this.x = 0
-      this.y = 0
-
-      this.rendered = false;
+      this.render();
     },
     fit: function (width, height) {
       var ratio = Math.min(width / this.width, height / this.height);
@@ -71,7 +71,8 @@
   };
 
   window.createImagery = function (obj, cb) {
-    var image    = new Image();
+    var image = new Image();
+    image.crossOrigin = 'anonymous';
     image.onload = function () { cb(new Imagery(this)); }
     if (obj instanceof File) {
       image.src = URL.createObjectURL(obj);
