@@ -4,56 +4,65 @@
   var Imagery = function (img) {
     this.image  = img;
     this.canvas = document.createElement('canvas');
-    this.width  = img.width;
-    this.height = img.height;
-
-    this.x = 0
-    this.y = 0
 
     this.rendered = false;
   };
 
   Imagery.prototype = {
     resize: function (width, height) {
-      this.canvas.width  = this.width  = width;
-      this.canvas.height = this.height = height;
+      this.canvas.width  = width;
+      this.canvas.height = height;
 
-      this.render();
+      this.canvas.getContext('2d').drawImage(this.image, 0, 0, width, height);
+
+      return (this.rendered = true);
     },
     fit: function (width, height) {
-      var ratio = Math.min(width / this.width, height / this.height);
+      var ratio = Math.min(width / this.image.width, height / this.image.height);
 
-      this.canvas.width  = this.width  *= ratio;
-      this.canvas.height = this.height *= ratio;
+      this.canvas.width  = this.image.width  * ratio;
+      this.canvas.height = this.image.height * ratio;
 
-      this.render();
+      this.canvas.getContext('2d').drawImage(this.image, 0, 0, this.canvas.width, this.canvas.height);
+
+      return (this.rendered = true);
     },
     fill: function (width, height) {
-      var ratio = Math.max(width / this.width, height / this.height);
+      var ratio = Math.max(width / this.image.width, height / this.image.height);
 
-      this.x = ((this.width * ratio) - width) / -2;
-      this.y = ((this.height * ratio) - height) / -2;
+      var x = ((this.image.width * ratio) - width) / -2;
+      var y = ((this.image.height * ratio) - height) / -2;
 
-      this.width  *= ratio;
-      this.height *= ratio;
+      var draw_width  = this.image.width  * ratio;
+      var draw_height = this.image.height * ratio;
 
       this.canvas.width  = width;
       this.canvas.height = height;
 
-      this.rendered = true;
+      this.canvas.getContext('2d').drawImage(this.image, x, y, draw_width, draw_height);
 
-      this.canvas.getContext('2d').drawImage(this.image, this.x, this.y, this.width, this.height);
+      return (this.rendered = true);
     },
-    render: function () {
-      this.canvas.width  = this.width;
-      this.canvas.height = this.height;
+    crop: function (x, y, width, height) {
+      if (x > this.image.width || y > this.image.height) { return false; }
 
-      this.rendered = true;
+      width  = Math.min(width, image.width - x);
+      height = Math.min(height, image.height - y);
 
-      this.canvas.getContext('2d').drawImage(this.image, this.x, this.y, this.width, this.height);
+      this.canvas.getContext('2d').drawImage(this.image, -x, -y, width, height);
+
+      return (this.rendered = true);
+    },
+    reset: function () {
+      this.canvas.width  = this.image.width;
+      this.canvas.height = this.image.height;
+
+      this.canvas.getContext('2d').drawImage(this.image, 0, 0);
+
+      return (this.rendered = true);
     },
     to_blob: function () {
-      if (!this.rendered) { this.render(); }
+      if (!this.rendered) { this.reset(); }
 
       var dataURL = this.canvas.toDataURL('image/png');
       var binary  = atob(dataURL.split(',')[1]);
@@ -64,16 +73,15 @@
       return new Blob([new Uint8Array(array)], { type: 'image/png' });
     },
     to_dataURL: function () {
-      if (!this.rendered) { this.render(); }
+      if (!this.rendered) { this.reset(); }
 
       return this.canvas.toDataURL('image/png');
     }
   };
 
   window.createImagery = function (obj, cb) {
-    var image = new Image(), called = false;
-    image.crossOrigin = 'anonymous';
-    image.onload = function () { if (called = !called) { cb(new Imagery(this)); } }
+    var image    = new Image();
+    image.onload = function () { cb(new Imagery(this)); }
     if (obj instanceof File) {
       image.src = URL.createObjectURL(obj);
     } else if ((obj.tagName && obj.tagName === 'IMG') || obj instanceof Image) {
@@ -81,11 +89,11 @@
     } else if (obj.tagName && obj.tagName === 'CANVAS') {
       image.src = obj.toDataURL();
     } else if (typeof obj === 'string') {
+      if (obj.substring(0,4) == 'http') { image.crossOrigin = 'anonymous'; }
       image.src = obj;
-    } else{
+    } else {
       return false;
     }
-    if (image.complete && !called) { cb(new Imagery(this)); }
     return true;
   };
 }(this));
