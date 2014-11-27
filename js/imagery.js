@@ -39,7 +39,7 @@
       this.canvas.width  = width;
       this.canvas.height = height;
 
-      this.canvas.getContext('2d').drawImage(this.image, x, y, draw_width, draw_height, 0, 0, this.image.width, this.image.height);
+      this.canvas.getContext('2d').drawImage(this.image, x, y, draw_width, draw_height, 0, 0, draw_width, draw_height);
 
       return (this.rendered = true);
     },
@@ -49,7 +49,7 @@
       width  = Math.min(width, image.width - x);
       height = Math.min(height, image.height - y);
 
-      this.canvas.getContext('2d').drawImage(this.image, x, y, width, height, 0, 0, this.image.width, this.image.height);
+      this.canvas.getContext('2d').drawImage(this.image, x, y, width, height, 0, 0);
 
       return (this.rendered = true);
     },
