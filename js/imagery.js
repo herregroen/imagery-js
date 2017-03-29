@@ -30,8 +30,8 @@
     fill: function (width, height) {
       var ratio = Math.max(width / this.image.width, height / this.image.height);
 
-      var x = ((this.image.width * ratio) - width) / 2;
-      var y = ((this.image.height * ratio) - height) / 2;
+      var x = ((this.image.width * ratio) - width) / -2;
+      var y = ((this.image.height * ratio) - height) / -2;
 
       var draw_width  = this.image.width  * ratio;
       var draw_height = this.image.height * ratio;
@@ -39,7 +39,7 @@
       this.canvas.width  = width;
       this.canvas.height = height;
 
-      this.canvas.getContext('2d').drawImage(this.image, x, y, draw_width, draw_height, 0, 0, draw_width, draw_height);
+      this.canvas.getContext('2d').drawImage(this.image, x, y, draw_width, draw_height);
 
       return (this.rendered = true);
     },
@@ -49,8 +49,8 @@
       width  = Math.min(width, image.width - x);
       height = Math.min(height, image.height - y);
 
-      this.canvas.getContext('2d').drawImage(this.image, x, y, width, height, 0, 0);
-
+      this.canvas.getContext('2d').drawImage(this.image, -x, -y, width, height);
+      
       return (this.rendered = true);
     },
     reset: function () {
